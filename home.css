@@ -1,0 +1,115 @@
+
+      :root {
+        --bg-1: #07101a;
+        --bg-2: #051824;
+        --muted: #8fbfe8;
+        --accent: #5fd3ff;
+        --top-accent: linear-gradient(90deg,#ffd58a,#ff9d9d);
+        --card-radius: 12px;
+      }
+
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: radial-gradient(1200px 500px at 10% 10%, rgba(8,35,48,0.4), transparent),
+                    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        color: #eaf6ff;
+        padding: 28px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      header { margin-bottom: 12px; }
+      h1 { margin: 0; font-size: 24px; font-weight: 700; }
+      .lead { margin: 6px 0 0 0; color: var(--muted); font-size: 13px; }
+
+      /* gallery grid - responsive:
+         - 1 column on small viewports
+         - 2 columns on narrow tablets
+         - 3+ on larger screens
+      */
+      #gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .card {
+        position: relative;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 10px;
+        border-radius: var(--card-radius);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05));
+        border: 1px solid rgba(255,255,255,0.03);
+        box-shadow: 0 8px 26px rgba(3,10,18,0.6);
+        transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+        overflow: visible;
+        backdrop-filter: blur(6px) saturate(120%);
+      }
+      .card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px rgba(3,12,26,0.75); }
+
+      /* subtle top-highlight for highest rated */
+      .card.top {
+        border-image: var(--top-accent) 1;
+        box-shadow: 0 14px 40px rgba(255,160,120,0.06);
+      }
+
+      .thumb {
+        width: 86px;
+        height: 128px;
+        border-radius: 10px;
+        overflow: hidden;
+        flex: 0 0 86px;
+        background: linear-gradient(180deg,#071018,#0b2231);
+        display: grid;
+        place-items: center;
+        position: relative;
+        border: 1px solid rgba(255,255,255,0.03);
+      }
+      .thumb img { width:100%; height:100%; object-fit:cover; display:block; transition: transform 360ms; }
+      .card:hover .thumb img { transform: scale(1.03); }
+
+      .info { display:flex; flex-direction:column; min-width:0; }
+      .title { font-size:15px; font-weight:800; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .meta { color: var(--muted); font-size:13px; margin-bottom:8px; }
+
+      /* rating pill (simple, inline) */
+      .rating-pill {
+        display:inline-block;
+        padding:6px 8px;
+        border-radius:999px;
+        font-weight:800;
+        font-size:13px;
+        color:#071019;
+        background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+        width:auto;
+        min-width:56px;
+        text-align:center;
+      }
+
+      .small-muted { font-size:12px; color:var(--muted); margin-top:8px; font-weight:600; }
+
+      .fallback-initials { font-size:22px; font-weight:900; color:var(--muted); }
+
+      /* mobile adjustments */
+      @media (max-width: 520px) {
+        body { padding: 16px; }
+        #gallery { gap: 12px; }
+        .card { gap: 10px; padding: 10px; }
+        .thumb { width: 74px; height: 110px; flex: 0 0 74px; }
+        .title { font-size:14px; }
+        .rating-pill { font-size:12px; min-width:48px; padding:5px 7px; }
+      }
+      /* mobile adjustments */
+      @media (max-width: 420px) {
+        body { padding: 16px; }
+        #gallery { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .card { gap: 10px; padding: 10px; }
+        .thumb { width: 74px; height: 110px; flex: 0 0 74px; }
+        .title { font-size:14px; }
+        .rating-pill { font-size:12px; min-width:48px; padding:5px 7px; }
+      }
