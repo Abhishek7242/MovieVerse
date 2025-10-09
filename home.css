@@ -8,7 +8,11 @@
         --card-radius: 12px;
       }
 
-      html, body { height: 100%; }
+      *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
