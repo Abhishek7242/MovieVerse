@@ -73,7 +73,7 @@ function createCard(movie) {
     // small helper text
     const small = document.createElement("div");
     small.className = "small-muted";
-    small.textContent = "Higher is better";
+    small.textContent = movie.category;
 
     // append in order: title + meta + rating + small
     info.appendChild(title);
