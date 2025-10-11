@@ -74,7 +74,7 @@ h1 {
 
 /* subtle top-highlight for highest rated */
 .card.top {
-  border-image: var(--top-accent) 1;
+  /* border-image: var(--top-accent) 1; */
   box-shadow: 0 14px 40px rgba(255, 160, 120, 0.06);
 }
 
