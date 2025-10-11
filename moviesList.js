@@ -1,56 +1,118 @@
-const movies = [
-    {
-        name: "Inception",
-        url: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
-        rating: 8.8,
-        category: "Sci-Fi, Thriller"
-    },
-    {
-        name: "Power Project",
-        url: "https://m.media-amazon.com/images/M/MV5BY2VjMzUyNGYtMDM5Zi00YWQyLTlhYzItZGQwZWZhNmEwNzY2XkEyXkFqcGc@._V1_.jpg",
-        rating: 7.1,
-        category: "Action, Sci-Fi"
-    },
-    {
-        name: "The Dark Knight",
-        url: "https://image.tmdb.org/t/p/w780/1hRoyzDtpgMU7Dz4JF22RANzQO7.jpg",
-        rating: 9.0,
-        category: "Action, Crime, Drama"
-    },
-    {
-        name: "Interstellar",
-        url: "https://image.tmdb.org/t/p/w780/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg",
-        rating: 8.6,
-        category: "Sci-Fi, Adventure, Drama"
-    },
-    {
-        name: "Parasite",
-        url: "https://image.tmdb.org/t/p/w780/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-        rating: 8.6,
-        category: "Thriller, Drama"
-    },
-    {
-        name: "The Matrix",
-        url: "https://image.tmdb.org/t/p/w780/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-        rating: 8.7,
-        category: "Action, Sci-Fi"
-    },
-    {
-        name: "The Gray Man",
-        url: "https://assets-prd.ignimgs.com/2022/06/07/the-gray-man-button-1654637490629.jpg",
-        rating: 8,
-        category: "Action, Thriller"
-    },
-    {
-        name: "Dune",
-        url: "https://media.vanityfair.com/photos/5e962efaac720b00089fd0a9/1:1/w_1200,h_1200,c_limit/0520-Dune-Tout-Lede-a.jpg",
-        rating: 8.5,
-        category: "Sci-Fi, Adventure"
-    },
-    {
-        name: "Dune Part 2",
-        url: "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Dune_Part_Two_poster.jpeg/250px-Dune_Part_Two_poster.jpeg",
-        rating: 8.9,
-        category: "Sci-Fi, Epic, Drama"
-    },
-];
+const API_URL = "https://movie-api-production-8550.up.railway.app/api/movies";
+
+let movies = [];
+
+const gallery = document.getElementById("gallery");
+
+async function escapeHtml(s = "") {
+    return String(s).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+}
+
+function createCard(movie) {
+    const card = document.createElement("article");
+    // we'll set the "top" class later after computing maxRating
+    card.className = "card";
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", movie.name + " — rating " + (movie.rating ?? "N/A"));
+
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+
+    const img = document.createElement("img");
+    img.alt = movie.name || "poster";
+    img.src = movie.url;
+
+    img.onerror = function () {
+        thumb.innerHTML = "";
+        const initials = (movie.name || "")
+            .split(" ")
+            .map(w => w[0] || "")
+            .slice(0, 2)
+            .join("")
+            .toUpperCase() || "?";
+        const fallback = document.createElement("div");
+        fallback.className = "fallback-initials";
+        fallback.textContent = initials;
+        thumb.appendChild(fallback);
+    };
+
+    thumb.appendChild(img);
+
+    const info = document.createElement("div");
+    info.className = "info";
+
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = movie.name || "Untitled";
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = "Movie";
+
+    // rating pill (simple)
+    const rating = document.createElement("div");
+    rating.className = "rating-pill";
+    rating.textContent = (movie.rating !== undefined && movie.rating !== null) ? Number(movie.rating).toFixed(1) + " / 10" : "N/A";
+
+    // small helper text
+    const small = document.createElement("div");
+    small.className = "small-muted";
+    small.textContent = movie.category;
+
+    // append in order: title + meta + rating + small
+    info.appendChild(title);
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.gap = "8px";
+    row.appendChild(meta);
+    row.appendChild(rating);
+    info.appendChild(row);
+    info.appendChild(small);
+
+    card.appendChild(thumb);
+    card.appendChild(info);
+
+    return card;
+}
+
+async function loadMovies() {
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        movies = await response.json();
+
+        console.log("✅ Movies loaded:", movies);
+
+        // --- move all rendering logic here so it runs after fetch completes ---
+
+        // stable sort: highest rating first
+        const sorted = movies.map((m, i) => ({ ...m, __idx: i }))
+            .sort((a, b) => {
+                if (b.rating === a.rating) return a.__idx - b.__idx;
+                return (b.rating ?? -Infinity) - (a.rating ?? -Infinity);
+            });
+
+        const maxRating = sorted.reduce((mx, m) => Math.max(mx, Number(m.rating ?? -Infinity)), -Infinity);
+
+        // render
+        gallery.innerHTML = "";
+        sorted.forEach(m => {
+            const card = createCard(m);
+            // add "top" class if this movie has the max rating
+            if (Number(m.rating) === maxRating) card.classList.add("top");
+            gallery.appendChild(card);
+        });
+
+        // --- end rendering logic ---
+
+    } catch (err) {
+        console.error("❌ Failed to fetch movies:", err);
+    }
+}
+
+// Call when page loads
+loadMovies();

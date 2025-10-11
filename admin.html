@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MovieVerse Admin — Movie Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="header-title">
+            <div class="header-icon">
+              <a href="/index.html"> <i class="fas fa-film"></i></a>
+            </div>
+            <span>MovieVerse Admin</span>
+          </div>
+          <div class="header-actions">
+            <div class="search-container">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search movies..."
+              />
+            </div>
+            <button id="addMovieBtn" class="btn btn-success">
+              <i class="fas fa-plus"></i>
+              Add Movie
+            </button>
+            <button id="refreshBtn" class="btn btn-primary">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Section -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="totalMovies">0</div>
+          <div class="stat-label">Total Movies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgRating">0.0</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="categories">0</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lastUpdated">-</div>
+          <div class="stat-label">Last Updated</div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label for="categoryFilter">Category:</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="ratingFilter">Min Rating:</label>
+            <select id="ratingFilter" class="filter-select">
+              <option value="">Any Rating</option>
+              <option value="8">8+ Stars</option>
+              <option value="7">7+ Stars</option>
+              <option value="6">6+ Stars</option>
+              <option value="5">5+ Stars</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="sortBy">Sort by:</label>
+            <select id="sortBy" class="filter-select">
+              <option value="rating-desc">Rating (High to Low)</option>
+              <option value="rating-asc">Rating (Low to High)</option>
+              <option value="name-asc">Name (A to Z)</option>
+              <option value="name-desc">Name (Z to A)</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Movies Grid -->
+        <div id="moviesGrid" class="movies-grid"></div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading hidden">
+          <div class="spinner"></div>
+          Loading movies...
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-state-icon">
+            <i class="fas fa-film"></i>
+          </div>
+          <h3>No movies found</h3>
+          <p>Try adjusting your search or filters</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div class="modal-header">
+          <h2 id="modalTitle" class="modal-title">
+            <i class="fas fa-edit"></i>
+            Edit Movie
+          </h2>
+        </div>
+
+        <form id="editForm" class="modal-body">
+          <div class="form-group">
+            <label for="editName" class="form-label">Movie Name</label>
+            <input
+              type="text"
+              id="editName"
+              class="form-input"
+              required
+              placeholder="Enter movie name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editUrl" class="form-label">Poster URL</label>
+            <input
+              type="url"
+              id="editUrl"
+              class="form-input"
+              required
+              placeholder="https://example.com/poster.jpg"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editRating" class="form-label">Rating (0-10)</label>
+            <input
+              type="number"
+              id="editRating"
+              class="form-input"
+              min="0"
+              max="10"
+              step="0.1"
+              required
+              placeholder="8.5"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editCategory" class="form-label">Category</label>
+            <input
+              type="text"
+              id="editCategory"
+              class="form-input"
+              required
+              placeholder="Action, Drama, Comedy..."
+            />
+          </div>
+
+          <div id="modalMessage" class="status-message hidden"></div>
+        </form>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelBtn" class="btn btn-secondary">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="saveBtn"
+            class="btn btn-success"
+            form="editForm"
+          >
+            <i class="fas fa-save"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Movie Modal -->
+    <div id="addModalBackdrop" class="modal-backdrop" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="addModalTitle"
+      >
+        <div class="modal-header">
+          <h2 id="addModalTitle" class="modal-title">
+            <i class="fas fa-plus-circle"></i>
+            Add New Movie
+          </h2>
+        </div>
+
+        <form id="addForm" class="modal-body">
+          <div class="form-group">
+            <label for="addName" class="form-label">Movie Name</label>
+            <input
+              type="text"
+              id="addName"
+              class="form-input"
+              required
+              placeholder="Enter movie name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addUrl" class="form-label">Poster URL</label>
+            <input
+              type="url"
+              id="addUrl"
+              class="form-input"
+              required
+              placeholder="https://example.com/poster.jpg"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addRating" class="form-label">Rating (0-10)</label>
+            <input
+              type="number"
+              id="addRating"
+              class="form-input"
+              min="0"
+              max="10"
+              step="0.1"
+              required
+              placeholder="8.5"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addCategory" class="form-label">Category</label>
+            <input
+              type="text"
+              id="addCategory"
+              class="form-input"
+              required
+              placeholder="Action, Drama, Comedy..."
+            />
+          </div>
+
+          <div id="addModalMessage" class="status-message hidden"></div>
+        </form>
+
+        <div class="modal-footer">
+          <button type="button" id="addCancelBtn" class="btn btn-secondary">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="addSaveBtn"
+            class="btn btn-success"
+            form="addForm"
+          >
+            <i class="fas fa-plus"></i>
+            Add Movie
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="admin.js"></script>
