@@ -51,6 +51,19 @@ function createCard(movie) {
     meta.className = "meta";
     meta.textContent = "Movie";
 
+    const recomendation = document.createElement("div");
+    if (Number(movie.rating) >= 6 && Number(movie.rating) <= 8) {
+        recomendation.textContent = "Recommended";
+        recomendation.className = "recomendation recommended";
+    } else if (Number(movie.rating) > 8) {
+        recomendation.textContent = "Highly Recommended";
+        recomendation.className = "recomendation highly-recommended";
+    } else {
+        recomendation.textContent = "Optional to watch";
+        recomendation.className = "recomendation optional";
+    }
+
+
     // rating pill (simple)
     const rating = document.createElement("div");
     rating.className = "rating-pill";
@@ -71,6 +84,8 @@ function createCard(movie) {
     row.appendChild(rating);
     info.appendChild(row);
     info.appendChild(small);
+
+    info.appendChild(recomendation);
 
     card.appendChild(thumb);
     card.appendChild(info);
