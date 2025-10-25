@@ -49,7 +49,12 @@ function createCard(movie) {
 
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = "Movie";
+    if (movie.name.toLowerCase().includes("series") || movie.name.toLowerCase().includes("season")) {
+        meta.textContent = "Series";
+    } else {
+        meta.textContent = "Movie";
+    }
+
 
     const recomendation = document.createElement("div");
     if (Number(movie.rating) >= 6 && Number(movie.rating) <= 8) {
